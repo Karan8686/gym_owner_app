@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Edit Template</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#322f35",
+                        "tertiary": "#765b00",
+                        "surface-dim": "#ded8e0",
+                        "on-secondary-fixed-variant": "#4b4263",
+                        "tertiary-fixed-dim": "#e7c365",
+                        "secondary-fixed-dim": "#cdc0e9",
+                        "surface-container-high": "#ece6ee",
+                        "on-secondary-container": "#645a7d",
+                        "secondary-container": "#e1d4fd",
+                        "surface-variant": "#e6e0e9",
+                        "on-surface-variant": "#494551",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed": "#1f1635",
+                        "on-primary-fixed-variant": "#4f378a",
+                        "on-error": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container": "#f2ecf4",
+                        "secondary-fixed": "#e9ddff",
+                        "surface-container-low": "#f8f2fa",
+                        "surface-tint": "#6750a4",
+                        "background": "#fdf7ff",
+                        "on-primary-fixed": "#22005d",
+                        "primary-container": "#6750a4",
+                        "on-background": "#1d1b20",
+                        "tertiary-container": "#c9a74d",
+                        "error": "#ba1a1a",
+                        "surface-bright": "#fdf7ff",
+                        "inverse-primary": "#cfbcff",
+                        "primary": "#4f378a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed": "#241a00",
+                        "primary-fixed": "#e9ddff",
+                        "on-surface": "#1d1b20",
+                        "tertiary-fixed": "#ffdf93",
+                        "on-primary-container": "#e0d2ff",
+                        "surface-container-highest": "#e6e0e9",
+                        "on-tertiary-container": "#503d00",
+                        "outline-variant": "#cbc4d2",
+                        "on-tertiary-fixed-variant": "#594400",
+                        "surface": "#fdf7ff",
+                        "inverse-on-surface": "#f5eff7",
+                        "outline": "#7a7582",
+                        "on-primary": "#ffffff",
+                        "secondary": "#63597c",
+                        "error-container": "#ffdad6",
+                        "primary-fixed-dim": "#cfbcff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "container-padding": "24px",
+                        "stack-sm": "8px",
+                        "gutter": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "label": ["Inter"],
+                        "display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "headline": ["Inter"],
+                        "data-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "label": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "display": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "headline": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "data-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Suppress Webkit search cancel button */
+        input[type="text"]::-webkit-search-cancel-button { display: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-inverse-on-surface text-on-background min-h-screen flex flex-col font-body-sm pb-24">
+<!-- Contextual Header (Task Focus: Suppress Global Nav) -->
+<header class="w-full flex items-center px-container-padding h-16">
+<button aria-label="Go back" class="flex items-center justify-center p-unit -ml-unit text-on-background hover:bg-surface-variant rounded-full transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'wght' 300;">arrow_back</span>
+</button>
+</header>
+<main class="flex-1 px-container-padding flex flex-col gap-stack-lg">
+<!-- Editable Template Name -->
+<div class="w-full">
+<input class="w-full bg-transparent border-0 border-b border-outline-variant focus:border-on-background focus:ring-0 px-0 py-unit font-display text-display text-on-background placeholder:text-outline transition-colors" placeholder="Template Name" type="text" value="Hypertrophy Focus A"/>
+</div>
+<!-- Day Tabs -->
+<div class="w-full overflow-x-auto no-scrollbar">
+<div class="flex justify-between min-w-full border-b border-outline-variant">
+<button class="pb-unit px-unit font-label text-label uppercase text-outline border-b-2 border-transparent transition-colors">Mon</button>
+<button class="pb-unit px-unit font-label text-label uppercase text-outline border-b-2 border-transparent transition-colors">Tue</button>
+<button class="pb-unit px-unit font-label text-label uppercase text-on-background border-b-2 border-on-background transition-colors">Wed</button>
+<button class="pb-unit px-unit font-label text-label uppercase text-outline border-b-2 border-transparent transition-colors">Thu</button>
+<button class="pb-unit px-unit font-label text-label uppercase text-outline border-b-2 border-transparent transition-colors">Fri</button>
+<button class="pb-unit px-unit font-label text-label uppercase text-outline border-b-2 border-transparent transition-colors">Sat</button>
+<button class="pb-unit px-unit font-label text-label uppercase text-outline border-b-2 border-transparent transition-colors">Sun</button>
+</div>
+</div>
+<!-- Exercise List -->
+<div class="flex flex-col gap-stack-md">
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg flex flex-col overflow-hidden">
+<!-- Row 1 -->
+<div class="flex justify-between items-center p-gutter border-b border-outline-variant last:border-b-0 group">
+<span class="font-body-lg text-body-lg text-on-background truncate pr-gutter">Barbell Bench Press</span>
+<div class="flex items-center gap-stack-sm shrink-0">
+<span class="font-data-sm text-data-sm text-outline tracking-tight">3x10</span>
+<button aria-label="Remove exercise" class="text-outline hover:text-on-background transition-colors flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="flex justify-between items-center p-gutter border-b border-outline-variant last:border-b-0 group">
+<span class="font-body-lg text-body-lg text-on-background truncate pr-gutter">Incline Dumbbell Press</span>
+<div class="flex items-center gap-stack-sm shrink-0">
+<span class="font-data-sm text-data-sm text-outline tracking-tight">3x12</span>
+<button aria-label="Remove exercise" class="text-outline hover:text-on-background transition-colors flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="flex justify-between items-center p-gutter border-b border-outline-variant last:border-b-0 group">
+<span class="font-body-lg text-body-lg text-on-background truncate pr-gutter">Cable Crossovers</span>
+<div class="flex items-center gap-stack-sm shrink-0">
+<span class="font-data-sm text-data-sm text-outline tracking-tight">4x15</span>
+<button aria-label="Remove exercise" class="text-outline hover:text-on-background transition-colors flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="flex justify-between items-center p-gutter border-b border-outline-variant last:border-b-0 group">
+<span class="font-body-lg text-body-lg text-on-background truncate pr-gutter">Tricep Pushdowns</span>
+<div class="flex items-center gap-stack-sm shrink-0">
+<span class="font-data-sm text-data-sm text-outline tracking-tight">3x15</span>
+<button aria-label="Remove exercise" class="text-outline hover:text-on-background transition-colors flex items-center justify-center p-1">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Add Exercise Button -->
+<button class="w-full bg-surface-container-lowest border border-outline-variant text-on-background font-label text-label uppercase rounded-lg py-3 flex justify-center items-center gap-unit hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                Add Exercise
+            </button>
+</div>
+</main>
+<!-- Fixed Bottom Action Area -->
+<div class="fixed bottom-0 left-0 w-full p-container-padding bg-inverse-on-surface flex justify-center">
+<button class="w-full max-w-[400px] bg-on-background text-background font-label text-label uppercase rounded-lg py-4 hover:opacity-90 transition-opacity flex justify-center items-center">
+            Save Template
+        </button>
+</div>
+</body></html>

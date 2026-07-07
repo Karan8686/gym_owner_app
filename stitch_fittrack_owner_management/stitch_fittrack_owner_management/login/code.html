@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitTrack Owner - Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#322f35",
+                      "tertiary": "#765b00",
+                      "surface-dim": "#ded8e0",
+                      "on-secondary-fixed-variant": "#4b4263",
+                      "tertiary-fixed-dim": "#e7c365",
+                      "secondary-fixed-dim": "#cdc0e9",
+                      "surface-container-high": "#ece6ee",
+                      "on-secondary-container": "#645a7d",
+                      "secondary-container": "#e1d4fd",
+                      "surface-variant": "#e6e0e9",
+                      "on-surface-variant": "#494551",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed": "#1f1635",
+                      "on-primary-fixed-variant": "#4f378a",
+                      "on-error": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container": "#f2ecf4",
+                      "secondary-fixed": "#e9ddff",
+                      "surface-container-low": "#f8f2fa",
+                      "surface-tint": "#6750a4",
+                      "background": "#fdf7ff",
+                      "on-primary-fixed": "#22005d",
+                      "primary-container": "#6750a4",
+                      "on-background": "#1d1b20",
+                      "tertiary-container": "#c9a74d",
+                      "error": "#ba1a1a",
+                      "surface-bright": "#fdf7ff",
+                      "inverse-primary": "#cfbcff",
+                      "primary": "#4f378a",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#241a00",
+                      "primary-fixed": "#e9ddff",
+                      "on-surface": "#1d1b20",
+                      "tertiary-fixed": "#ffdf93",
+                      "on-primary-container": "#e0d2ff",
+                      "surface-container-highest": "#e6e0e9",
+                      "on-tertiary-container": "#503d00",
+                      "outline-variant": "#cbc4d2",
+                      "on-tertiary-fixed-variant": "#594400",
+                      "surface": "#fdf7ff",
+                      "inverse-on-surface": "#f5eff7",
+                      "outline": "#7a7582",
+                      "on-primary": "#ffffff",
+                      "secondary": "#63597c",
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#cfbcff",
+                      "on-secondary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-lg": "32px",
+                      "stack-md": "16px",
+                      "container-padding": "24px",
+                      "stack-sm": "8px",
+                      "gutter": "16px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "data-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "headline": [
+                              "Inter"
+                      ],
+                      "data-sm": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        /* Minimal reset for inputs */
+        input[type="text"], input[type="password"] {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-inverse-on-surface font-body-sm text-body-sm text-on-surface min-h-screen flex flex-col items-center justify-center px-container-padding antialiased selection:bg-surface-tint selection:text-on-primary">
+<main class="w-full max-w-sm flex flex-col items-center w-full">
+<!-- Header -->
+<header class="flex flex-col items-center mb-stack-lg">
+<h1 class="font-display text-display uppercase tracking-[0.2em] font-black text-on-background">FITTRACK</h1>
+<p class="font-label text-label text-outline mt-unit">Owner</p>
+</header>
+<!-- Login Form Card -->
+<div class="w-full bg-surface-container-lowest border border-outline-variant p-container-padding">
+<form class="flex flex-col gap-stack-md" onsubmit="event.preventDefault();">
+<!-- Username Field -->
+<div class="flex flex-col gap-unit">
+<label class="font-label text-label uppercase text-on-surface-variant" for="username">Username</label>
+<input autocomplete="username" class="w-full h-12 border border-outline-variant bg-surface-container-lowest px-3 font-body-lg text-body-lg text-on-background focus:outline-none focus:border-on-background transition-colors" id="username" placeholder="owner@gym.co" spellcheck="false" type="text"/>
+</div>
+<!-- PIN Field -->
+<div class="flex flex-col gap-unit">
+<label class="font-label text-label uppercase text-on-surface-variant" for="pin-1">PIN</label>
+<div class="flex justify-between gap-unit">
+<input class="w-14 h-14 border border-outline-variant bg-surface-container-lowest text-center font-data-lg text-data-lg text-on-background focus:outline-none focus:border-on-background transition-colors" id="pin-1" inputmode="numeric" maxlength="1" type="password"/>
+<input class="w-14 h-14 border border-outline-variant bg-surface-container-lowest text-center font-data-lg text-data-lg text-on-background focus:outline-none focus:border-on-background transition-colors" id="pin-2" inputmode="numeric" maxlength="1" type="password"/>
+<input class="w-14 h-14 border border-outline-variant bg-surface-container-lowest text-center font-data-lg text-data-lg text-on-background focus:outline-none focus:border-on-background transition-colors" id="pin-3" inputmode="numeric" maxlength="1" type="password"/>
+<input class="w-14 h-14 border border-outline-variant bg-surface-container-lowest text-center font-data-lg text-data-lg text-on-background focus:outline-none focus:border-on-background transition-colors" id="pin-4" inputmode="numeric" maxlength="1" type="password"/>
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full h-12 mt-stack-md bg-on-background text-on-error rounded-lg font-label text-label uppercase tracking-widest hover:bg-surface-tint transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-on-background" type="submit">
+                    Log In
+                </button>
+</form>
+</div>
+<!-- Footer Link -->
+<a class="mt-stack-lg font-label text-label text-outline hover:text-on-background transition-colors" href="#">Forgot PIN?</a>
+</main>
+<script>
+        // Simple auto-advance for PIN inputs to demonstrate micro-interaction
+        const pinInputs = document.querySelectorAll('input[type="password"]');
+        pinInputs.forEach((input, index) => {
+            input.addEventListener('input', (e) => {
+                if (e.target.value.length === 1 && index < pinInputs.length - 1) {
+                    pinInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                    pinInputs[index - 1].focus();
+                }
+            });
+        });
+    </script>
+</body></html>

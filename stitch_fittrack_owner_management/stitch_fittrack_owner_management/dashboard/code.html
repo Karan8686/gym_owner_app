@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FitTrack Owner - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#322f35",
+                      "tertiary": "#765b00",
+                      "surface-dim": "#ded8e0",
+                      "on-secondary-fixed-variant": "#4b4263",
+                      "tertiary-fixed-dim": "#e7c365",
+                      "secondary-fixed-dim": "#cdc0e9",
+                      "surface-container-high": "#ece6ee",
+                      "on-secondary-container": "#645a7d",
+                      "secondary-container": "#e1d4fd",
+                      "surface-variant": "#e6e0e9",
+                      "on-surface-variant": "#494551",
+                      "on-tertiary": "#ffffff",
+                      "on-secondary-fixed": "#1f1635",
+                      "on-primary-fixed-variant": "#4f378a",
+                      "on-error": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container": "#f2ecf4",
+                      "secondary-fixed": "#e9ddff",
+                      "surface-container-low": "#f8f2fa",
+                      "surface-tint": "#6750a4",
+                      "background": "#F6F6F4", /* Overridden per prompt F6F6F4 */
+                      "on-primary-fixed": "#22005d",
+                      "primary-container": "#6750a4",
+                      "on-background": "#161616", /* Overridden per prompt 161616 */
+                      "tertiary-container": "#c9a74d",
+                      "error": "#D6321F", /* Overridden per prompt D6321F */
+                      "surface-bright": "#fdf7ff",
+                      "inverse-primary": "#cfbcff",
+                      "primary": "#161616", /* Overridden per prompt 161616 */
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed": "#241a00",
+                      "primary-fixed": "#e9ddff",
+                      "on-surface": "#161616", /* Overridden per prompt 161616 */
+                      "tertiary-fixed": "#ffdf93",
+                      "on-primary-container": "#e0d2ff",
+                      "surface-container-highest": "#e6e0e9",
+                      "on-tertiary-container": "#503d00",
+                      "outline-variant": "#E4E4E1", /* Overridden per prompt E4E4E1 */
+                      "on-tertiary-fixed-variant": "#594400",
+                      "surface": "#FFFFFF", /* Overridden per prompt FFFFFF */
+                      "inverse-on-surface": "#f5eff7",
+                      "outline": "#E4E4E1", /* Overridden per prompt E4E4E1 */
+                      "on-primary": "#ffffff",
+                      "secondary": "#E4E4E1", /* Overridden per prompt E4E4E1 */
+                      "error-container": "#ffdad6",
+                      "primary-fixed-dim": "#cfbcff",
+                      "on-secondary": "#161616" /* Overridden per prompt 161616 */
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-lg": "32px",
+                      "stack-md": "16px",
+                      "container-padding": "24px",
+                      "stack-sm": "8px",
+                      "gutter": "16px",
+                      "unit": "4px"
+              },
+              "fontFamily": {
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "label": [
+                              "Inter"
+                      ],
+                      "display": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "data-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "headline": [
+                              "Inter"
+                      ],
+                      "data-sm": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "display": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "data-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "data-sm": [
+                              "13px",
+                              {
+                                      "lineHeight": "18px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body { background-color: #F6F6F4; }
+        .bg-surface { background-color: #FFFFFF; }
+        .text-error { color: #D6321F; }
+        .text-primary { color: #161616; }
+        .text-on-surface-variant { color: #7a7582; }
+        .border-outline-variant { border-color: #E4E4E1; }
+        .border-outline { border-color: #E4E4E1; }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-body-sm text-on-background min-h-screen flex flex-col antialiased">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-container-padding h-16 bg-surface border-b border-outline-variant md:hidden">
+<div>
+<span class="font-label text-label text-on-surface-variant uppercase" id="current-date"></span>
+<div class="font-headline text-headline font-black text-on-background mt-unit">FitTrack Owner</div>
+</div>
+<button class="text-on-background hover:bg-surface-container transition-colors p-2 rounded">
+<span class="material-symbols-outlined font-light" style="font-variation-settings: 'FILL' 0, 'wght' 200;">notifications</span>
+</button>
+</header>
+<header class="hidden md:flex justify-between items-center w-full px-container-padding h-16 bg-surface border-b border-outline-variant docked full-width top-0">
+<div class="flex items-center gap-gutter">
+<button class="text-on-background hover:bg-surface-container transition-colors p-2 rounded">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="font-headline text-headline font-black text-on-background">FitTrack Owner</div>
+</div>
+<nav class="flex gap-gutter">
+<a class="text-primary font-bold font-label text-label hover:bg-surface-container transition-colors p-2 rounded" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-label text-label hover:bg-surface-container transition-colors p-2 rounded" href="#">Members</a>
+<a class="text-on-surface-variant font-label text-label hover:bg-surface-container transition-colors p-2 rounded" href="#">Payments</a>
+<a class="text-on-surface-variant font-label text-label hover:bg-surface-container transition-colors p-2 rounded" href="#">Workouts</a>
+<a class="text-on-surface-variant font-label text-label hover:bg-surface-container transition-colors p-2 rounded" href="#">More</a>
+</nav>
+<button class="text-on-background hover:bg-surface-container transition-colors p-2 rounded">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow px-gutter pt-stack-md pb-32 max-w-7xl mx-auto w-full md:px-container-padding">
+<!-- Metrics Row -->
+<div class="flex flex-row gap-0 border border-outline-variant bg-surface rounded-none overflow-hidden mb-stack-lg">
+<div class="flex-1 p-stack-md text-center border-r border-outline-variant">
+<div class="font-data-lg text-display text-primary mb-unit">342</div>
+<div class="font-label text-label text-on-surface-variant uppercase">Active</div>
+</div>
+<div class="flex-1 p-stack-md text-center border-r border-outline-variant">
+<div class="font-data-lg text-display text-primary mb-unit">18</div>
+<div class="font-label text-label text-on-surface-variant uppercase">Expiring Soon</div>
+</div>
+<div class="flex-1 p-stack-md text-center">
+<div class="font-data-lg text-display text-error mb-unit">7</div>
+<div class="font-label text-label text-on-surface-variant uppercase">Expired</div>
+</div>
+</div>
+<!-- Renewals Due Section -->
+<section>
+<h2 class="font-label text-label text-on-surface-variant uppercase mb-stack-sm px-unit">Renewals due</h2>
+<div class="bg-surface border border-outline-variant rounded-none">
+<!-- Table Row 1 -->
+<div class="flex justify-between items-center py-3 px-stack-md border-b border-outline-variant last:border-b-0">
+<div>
+<div class="font-body-lg text-body-lg text-primary">Marcus Vance</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Annual Premium</div>
+</div>
+<div class="font-data-lg text-data-lg text-error">1 day</div>
+</div>
+<!-- Table Row 2 -->
+<div class="flex justify-between items-center py-3 px-stack-md border-b border-outline-variant last:border-b-0">
+<div>
+<div class="font-body-lg text-body-lg text-primary">Sarah Jenkins</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Monthly Basic</div>
+</div>
+<div class="font-data-lg text-data-lg text-error">2 days</div>
+</div>
+<!-- Table Row 3 -->
+<div class="flex justify-between items-center py-3 px-stack-md border-b border-outline-variant last:border-b-0">
+<div>
+<div class="font-body-lg text-body-lg text-primary">David Chen</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Quarterly Pro</div>
+</div>
+<div class="font-data-lg text-data-lg text-primary">5 days</div>
+</div>
+<!-- Table Row 4 -->
+<div class="flex justify-between items-center py-3 px-stack-md border-b border-outline-variant last:border-b-0">
+<div>
+<div class="font-body-lg text-body-lg text-primary">Elena Rodriguez</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Monthly Basic</div>
+</div>
+<div class="font-data-lg text-data-lg text-primary">7 days</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Contextual FAB -->
+<div class="fixed bottom-20 right-gutter z-40 md:bottom-stack-lg md:right-container-padding">
+<button class="bg-primary text-on-primary font-label text-label uppercase px-stack-md py-stack-sm rounded shadow-none hover:bg-surface-tint transition-colors flex items-center gap-unit">
+<span class="material-symbols-outlined" style="font-size: 16px;">add</span>
+            Add Member
+        </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface px-gutter border-t border-outline-variant h-14 md:hidden z-50">
+<a class="text-on-background font-bold border-b-2 border-on-background h-full flex items-center justify-center px-4 font-label text-label uppercase opacity-80" href="#">Dashboard</a>
+<a class="text-outline h-full flex items-center justify-center px-4 font-label text-label uppercase hover:text-on-background" href="#">Members</a>
+<a class="text-outline h-full flex items-center justify-center px-4 font-label text-label uppercase hover:text-on-background hidden sm:flex" href="#">Payments</a>
+<a class="text-outline h-full flex items-center justify-center px-4 font-label text-label uppercase hover:text-on-background hidden sm:flex" href="#">Workouts</a>
+<a class="text-outline h-full flex items-center justify-center px-4 font-label text-label uppercase hover:text-on-background" href="#">More</a>
+</nav>
+<script>
+        // Set today's date
+        const dateOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('en-US', dateOptions);
+    </script>
+</body></html>
