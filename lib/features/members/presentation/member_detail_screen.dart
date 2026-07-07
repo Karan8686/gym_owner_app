@@ -189,8 +189,19 @@ class MemberDetailScreen extends ConsumerWidget {
         borderRadius: BorderRadius.circular(cornerRadius),
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: AppColors.inkPrimary.withValues(alpha: 0.1),
+            backgroundImage: (data.member.photoUrl != null && data.member.photoUrl!.isNotEmpty)
+                ? NetworkImage(data.member.photoUrl!)
+                : null,
+            child: (data.member.photoUrl == null || data.member.photoUrl!.isEmpty)
+                ? const Icon(Icons.person, color: AppColors.inkPrimary, size: 32)
+                : null,
+          ),
+          const SizedBox(width: AppSpacing.gutter),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

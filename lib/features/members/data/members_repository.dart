@@ -40,74 +40,33 @@ class MembersRepository {
   /// Fetch all members with their latest membership, optionally filtered.
   ///
   /// The join pulls each member's most recent membership row.
-  Future<List<MemberWithMembership>> getMembers({
-    MemberStatusFilter filter = MemberStatusFilter.all,
-    String? searchQuery,
-  }) async {
-    // Fetch members
-    var query = supabase.from('members').select();
-
-    if (searchQuery != null && searchQuery.trim().isNotEmpty) {
-      final q = searchQuery.trim();
-      query = query.or('name.ilike.%$q%,phone_no.ilike.%$q%');
-    }
-
+  Future<List<MemberWithMembership>> getMembers() async {
+    // Fetch members and their memberships in a single query to avoid URL length limits.
+    var query = supabase.from('members').select('*, memberships(*)');
     final membersResult = await query.order('name', ascending: true);
     final memberRows = membersResult as List<dynamic>;
 
     if (memberRows.isEmpty) return [];
 
-    // Fetch latest membership per member in a single query
-    final memberIds = memberRows.map((r) => r['id'] as String).toList();
-    final membershipsResult = await supabase
-        .from('memberships')
-        .select()
-        .inFilter('member_id', memberIds)
-        .order('due_date', ascending: false);
-
-    final membershipRows = membershipsResult as List<dynamic>;
-
-    // Group: latest membership per member_id
-    final latestByMember = <String, Map<String, dynamic>>{};
-    for (final row in membershipRows) {
-      final memberId = row['member_id'] as String;
-      latestByMember.putIfAbsent(memberId, () => row);
-    }
-
-    // Build combined list
     final results = <MemberWithMembership>[];
+
     for (final mRow in memberRows) {
       final member = Member.fromJson(mRow as Map<String, dynamic>);
-      final mshipRow = latestByMember[member.id];
-      Membership? membership;
-      if (mshipRow != null) {
-        membership = Membership.fromJson(mshipRow);
-      }
-
-      // Apply status filter
-      if (filter != MemberStatusFilter.all) {
-        if (membership == null) continue;
-        final now = DateTime.now();
-        switch (filter) {
-          case MemberStatusFilter.active:
-            if (membership.status != MembershipStatus.active) continue;
-            break;
-          case MemberStatusFilter.expiring:
-            if (membership.status != MembershipStatus.active) continue;
-            final daysLeft = membership.dueDate.difference(now).inDays;
-            if (daysLeft > 7) continue; // expiring = within 7 days
-            break;
-          case MemberStatusFilter.expired:
-            if (membership.status != MembershipStatus.expired) continue;
-            break;
-          case MemberStatusFilter.all:
-            break;
-        }
+      
+      final mshipsList = mRow['memberships'] as List<dynamic>? ?? [];
+      Membership? latestMembership;
+      
+      if (mshipsList.isNotEmpty) {
+        final parsedMships = mshipsList
+            .map((r) => Membership.fromJson(r as Map<String, dynamic>))
+            .toList();
+        parsedMships.sort((a, b) => b.dueDate.compareTo(a.dueDate));
+        latestMembership = parsedMships.first;
       }
 
       results.add(MemberWithMembership(
         member: member,
-        latestMembership: membership,
+        latestMembership: latestMembership,
       ));
     }
 
@@ -160,6 +119,9 @@ class MembersRepository {
     required int durationMonths,
     required double priceCharged,
     required DateTime startDate,
+    String? photoUrl,
+    DateTime? customDueDate,
+    DateTime? customPaymentDate,
   }) async {
     final srNo = await _getNextSrNo();
 
@@ -168,16 +130,19 @@ class MembersRepository {
       'sr_no': srNo,
       'name': name,
       'phone_no': phoneNo,
+      if (photoUrl != null && photoUrl.trim().isNotEmpty) 'photo_url': photoUrl.trim(),
     }).select().single();
 
     final memberId = memberResponse['id'] as String;
 
     // Calculate due date
-    final dueDate = MembershipMath.calculateNewDueDate(
+    final dueDate = customDueDate ?? MembershipMath.calculateNewDueDate(
       currentDueDate: startDate,
       durationMonths: durationMonths,
       baseRenewalDate: startDate,
     );
+    
+    final paymentDate = customPaymentDate ?? startDate;
 
     // 2. Insert Membership
     final membershipResponse = await supabase.from('memberships').insert({
@@ -187,6 +152,7 @@ class MembersRepository {
       'price_charged': priceCharged,
       'start_date': startDate.toIso8601String(),
       'due_date': dueDate.toIso8601String(),
+      'payment_date': paymentDate.toIso8601String(),
       'status': 'active',
     }).select().single();
 
@@ -198,7 +164,7 @@ class MembersRepository {
       'membership_id': membershipId,
       'amount': priceCharged,
       'status': 'confirmed',
-      'paid_at': DateTime.now().toIso8601String(),
+      'paid_at': paymentDate.toIso8601String(),
       'confirmed_at': DateTime.now().toIso8601String(),
       'confirmed_by': supabase.auth.currentUser?.id,
     });

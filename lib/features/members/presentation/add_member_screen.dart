@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import '../../../core/config/theme.dart';
 import '../../pricing/data/pricing_repository.dart';
 import '../data/members_repository.dart';
+import '../domain/membership_math.dart';
 import 'member_list_controller.dart';
 
 class AddMemberScreen extends ConsumerStatefulWidget {
@@ -19,8 +20,13 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _photoUrlController = TextEditingController();
+  final _priceOverrideController = TextEditingController();
   
   DateTime _startDate = DateTime.now();
+  DateTime? _customDueDate;
+  DateTime? _customPaymentDate;
+  
   String _planType = 'weight'; // default
   int _durationMonths = 1; // default
   double _price = 45.0; // default (Basic 1 Month)
@@ -38,6 +44,8 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _photoUrlController.dispose();
+    _priceOverrideController.dispose();
     super.dispose();
   }
 
@@ -49,8 +57,22 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
     if (mounted) {
       setState(() {
         _price = computedPrice;
+        _priceOverrideController.text = _price.toStringAsFixed(2);
       });
     }
+  }
+
+  Widget _datePickerBuilder(BuildContext context, Widget? child) {
+    return Theme(
+      data: appTheme.copyWith(
+        colorScheme: const ColorScheme.light(
+          primary: AppColors.inkPrimary,
+          onPrimary: AppColors.surface,
+          onSurface: AppColors.inkPrimary,
+        ),
+      ),
+      child: child!,
+    );
   }
 
   Future<void> _selectStartDate(BuildContext context) async {
@@ -59,23 +81,43 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
       initialDate: _startDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2100),
-      builder: (context, child) {
-        return Theme(
-          data: appTheme.copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.inkPrimary,
-              onPrimary: AppColors.surface,
-              onSurface: AppColors.inkPrimary,
-            ),
-          ),
-          child: child!,
-        );
-      },
+      builder: _datePickerBuilder,
     );
     if (picked != null && picked != _startDate) {
       setState(() {
         _startDate = picked;
       });
+    }
+  }
+
+  Future<void> _selectCustomPaymentDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _customPaymentDate ?? _startDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: _datePickerBuilder,
+    );
+    if (picked != null) {
+      setState(() => _customPaymentDate = picked);
+    }
+  }
+
+  Future<void> _selectCustomDueDate(BuildContext context) async {
+    final calculated = MembershipMath.calculateNewDueDate(
+      currentDueDate: _startDate,
+      durationMonths: _durationMonths,
+      baseRenewalDate: _startDate,
+    );
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _customDueDate ?? calculated,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+      builder: _datePickerBuilder,
+    );
+    if (picked != null) {
+      setState(() => _customDueDate = picked);
     }
   }
 
@@ -88,13 +130,18 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
     });
 
     try {
+      final priceToSave = double.tryParse(_priceOverrideController.text.trim()) ?? _price;
+
       await ref.read(membersRepositoryProvider).createMember(
             name: _nameController.text.trim(),
             phoneNo: _phoneController.text.trim(),
             planType: _planType,
             durationMonths: _durationMonths,
-            priceCharged: _price,
+            priceCharged: priceToSave,
             startDate: _startDate,
+            photoUrl: _photoUrlController.text.trim(),
+            customDueDate: _customDueDate,
+            customPaymentDate: _customPaymentDate,
           );
 
       // Refresh list
@@ -167,7 +214,26 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
                                 : null,
                           ),
                           const Divider(height: 1, thickness: 1, color: AppColors.border),
-                          _buildDatePickerRow(),
+                          _buildTextField(
+                            controller: _photoUrlController,
+                            label: 'Photo URL (Optional)',
+                            placeholder: 'Enter image link',
+                            keyboardType: TextInputType.url,
+                          ),
+                          const Divider(height: 1, thickness: 1, color: AppColors.border),
+                          _buildDateSelectorRow(
+                            label: 'START DATE',
+                            date: _startDate,
+                            onTap: () => _selectStartDate(context),
+                          ),
+                          const Divider(height: 1, thickness: 1, color: AppColors.border),
+                          _buildDateSelectorRow(
+                            label: 'PAYMENT DATE',
+                            date: _customPaymentDate ?? _startDate,
+                            onTap: () => _selectCustomPaymentDate(context),
+                          ),
+                          const Divider(height: 1, thickness: 1, color: AppColors.border),
+                          _buildDueDatePickerRow(),
                         ],
                       ),
                     ),
@@ -261,9 +327,14 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
     );
   }
 
-  Widget _buildDatePickerRow() {
+  Widget _buildDateSelectorRow({
+    required String label,
+    required DateTime date,
+    required VoidCallback onTap,
+    String? subtitle,
+  }) {
     return GestureDetector(
-      onTap: () => _selectStartDate(context),
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: 12),
@@ -274,20 +345,51 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'START DATE',
+                  label,
                   style: AppText.label.copyWith(color: AppColors.inkSecondary),
                 ),
                 const SizedBox(height: AppSpacing.unit),
-                Text(
-                  DateFormat('yyyy-MM-dd').format(_startDate),
-                  style: AppText.dataLg,
+                Row(
+                  children: [
+                    Text(
+                      DateFormat('yyyy-MM-dd').format(date),
+                      style: AppText.dataLg,
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(width: AppSpacing.unit),
+                      Text(
+                        subtitle,
+                        style: AppText.label.copyWith(
+                          color: AppColors.inkPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
-            const Icon(Icons.calendar_today, color: AppColors.inkSecondary, size: 20),
+            const Icon(Icons.edit_calendar_outlined, color: AppColors.inkPrimary, size: 20),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDueDatePickerRow() {
+    final calculated = MembershipMath.calculateNewDueDate(
+      currentDueDate: _startDate,
+      durationMonths: _durationMonths,
+      baseRenewalDate: _startDate,
+    );
+    final isCustom = _customDueDate != null;
+    final displayDate = _customDueDate ?? calculated;
+
+    return _buildDateSelectorRow(
+      label: 'DUE DATE',
+      date: displayDate,
+      subtitle: isCustom ? '(Custom)' : '(Auto)',
+      onTap: () => _selectCustomDueDate(context),
     );
   }
 
@@ -373,16 +475,26 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
         const Divider(color: AppColors.border, thickness: 1),
         const SizedBox(height: AppSpacing.stackSm),
         Text(
-          'TOTAL DUE',
+          'PRICE PAID (₹)',
           style: AppText.label.copyWith(color: AppColors.inkSecondary),
         ),
         const SizedBox(height: AppSpacing.unit),
-        Text(
-          '₹${_price.toStringAsFixed(2)}',
-          style: AppText.display.copyWith(
-            fontFamily: 'JetBrainsMono',
-            fontWeight: FontWeight.w700,
-            fontSize: 28,
+        SizedBox(
+          width: 120,
+          child: TextFormField(
+            controller: _priceOverrideController,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            textAlign: TextAlign.right,
+            style: AppText.display.copyWith(
+              fontFamily: 'JetBrainsMono',
+              fontWeight: FontWeight.w700,
+              fontSize: 28,
+            ),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+              isDense: true,
+            ),
           ),
         ),
       ],

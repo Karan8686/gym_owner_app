@@ -125,7 +125,7 @@ class DashboardScreen extends ConsumerWidget {
           left: AppSpacing.gutter,
           right: AppSpacing.gutter,
           top: AppSpacing.stackMd,
-          bottom: 92,
+          bottom: 180,
         ),
         children: [
           // ---- Metrics row --------------------------------------------------
@@ -357,7 +357,7 @@ class DashboardScreen extends ConsumerWidget {
   // --------------------------------------------------------------------------
   Widget _buildFab(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 80),
+      margin: const EdgeInsets.only(bottom: 110),
       child: ElevatedButton.icon(
         onPressed: () => context.push(AppRoutes.addMember),
         style: ElevatedButton.styleFrom(

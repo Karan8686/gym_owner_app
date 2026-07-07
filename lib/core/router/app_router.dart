@@ -237,72 +237,71 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: SafeArea(
         bottom: true,
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-          height: 64,
-          decoration: BoxDecoration(
-            color: AppColors.surface.withValues(alpha: 0.95),
-            borderRadius: BorderRadius.circular(32),
-            border: Border.all(color: AppColors.border, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavItem(0, Icons.grid_view_rounded, 'DASHBOARD'),
-              _buildNavItem(1, Icons.people_alt_rounded, 'MEMBERS'),
-              _buildNavItem(2, Icons.payment_rounded, 'PAYMENTS'),
-              _buildNavItem(3, Icons.more_horiz_rounded, 'MORE'),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(int index, IconData icon, String label) {
-    final isActive = navigationShell.currentIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => navigationShell.goBranch(
-          index,
-          initialLocation: index == navigationShell.currentIndex,
-        ),
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Selected background capsule indicator
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.inkPrimary.withValues(alpha: 0.08)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Icon(
-                icon,
-                color: isActive ? AppColors.inkPrimary : AppColors.inkSecondary,
-                size: 22,
+        child: Padding(
+          padding: const EdgeInsets.only(left: 24, right: 24, bottom: 12),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(32),
+              border: Border.all(color: AppColors.border, width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(31),
+              child: NavigationBarTheme(
+                data: NavigationBarThemeData(
+                  labelTextStyle: WidgetStateProperty.resolveWith((states) {
+                    final isSelected = states.contains(WidgetState.selected);
+                    return AppText.label.copyWith(
+                      fontSize: 10,
+                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                      color: isSelected ? AppColors.inkPrimary : AppColors.inkSecondary,
+                    );
+                  }),
+                ),
+                child: NavigationBar(
+                  height: 68,
+                  backgroundColor: AppColors.surface.withValues(alpha: 0.95),
+                  elevation: 0, // Drop shadow is handled by the container
+                  indicatorColor: AppColors.inkPrimary.withValues(alpha: 0.08),
+                  selectedIndex: navigationShell.currentIndex,
+                  onDestinationSelected: (index) {
+                    navigationShell.goBranch(
+                      index,
+                      initialLocation: index == navigationShell.currentIndex,
+                    );
+                  },
+                  destinations: const [
+                    NavigationDestination(
+                      icon: Icon(Icons.grid_view_rounded, color: AppColors.inkSecondary),
+                      selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.inkPrimary),
+                      label: 'DASHBOARD',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.people_alt_rounded, color: AppColors.inkSecondary),
+                      selectedIcon: Icon(Icons.people_alt_rounded, color: AppColors.inkPrimary),
+                      label: 'MEMBERS',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.payment_rounded, color: AppColors.inkSecondary),
+                      selectedIcon: Icon(Icons.payment_rounded, color: AppColors.inkPrimary),
+                      label: 'PAYMENTS',
+                    ),
+                    NavigationDestination(
+                      icon: Icon(Icons.more_horiz_rounded, color: AppColors.inkSecondary),
+                      selectedIcon: Icon(Icons.more_horiz_rounded, color: AppColors.inkPrimary),
+                      label: 'MORE',
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: AppText.label.copyWith(
-                fontSize: 9,
-                fontWeight: isActive ? FontWeight.w800 : FontWeight.w500,
-                color: isActive ? AppColors.inkPrimary : AppColors.inkSecondary,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

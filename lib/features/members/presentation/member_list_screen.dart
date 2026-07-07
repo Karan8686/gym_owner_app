@@ -240,26 +240,15 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
       color: AppColors.inkPrimary,
       onRefresh: () =>
           ref.read(memberListControllerProvider.notifier).refresh(),
-      child: Container(
-        margin: const EdgeInsets.only(top: AppSpacing.stackMd),
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border.symmetric(
-            horizontal: BorderSide(color: AppColors.border),
-          ),
-        ),
-        child: ListView.separated(
-          padding: const EdgeInsets.only(bottom: 92),
-          itemCount: members.length,
-          separatorBuilder: (_, _) => const Divider(
-            height: 1,
-            thickness: 1,
-            color: AppColors.border,
-          ),
-          itemBuilder: (context, index) {
-            return _buildMemberRow(context, members[index]);
-          },
-        ),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.gutter,
+          vertical: AppSpacing.stackMd,
+        ).copyWith(bottom: 180),
+        itemCount: members.length,
+        itemBuilder: (context, index) {
+          return _buildMemberRow(context, members[index]);
+        },
       ),
     );
   }
@@ -271,40 +260,71 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
         ? AppColors.signal
         : AppColors.inkPrimary;
 
-    return GestureDetector(
-      onTap: () => context.push('/members/${item.member.id}'),
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.gutter,
-          vertical: AppSpacing.stackMd,
-        ),
-        child: Row(
-          children: [
-            // Left: name + phone
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.member.name, style: AppText.bodyLg),
-                  const SizedBox(height: AppSpacing.unit),
-                  Text(
-                    item.member.phoneNo,
-                    style: AppText.bodySm.copyWith(
-                      color: AppColors.inkSecondary,
+    return Card(
+      margin: const EdgeInsets.only(bottom: AppSpacing.stackMd),
+      elevation: 0,
+      color: AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(cornerRadius),
+        side: const BorderSide(color: AppColors.border),
+      ),
+      child: InkWell(
+        onTap: () => context.push('/members/${item.member.id}'),
+        borderRadius: BorderRadius.circular(cornerRadius),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.gutter),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: AppColors.inkPrimary.withValues(alpha: 0.1),
+                backgroundImage: (item.member.photoUrl != null && item.member.photoUrl!.isNotEmpty)
+                    ? NetworkImage(item.member.photoUrl!)
+                    : null,
+                child: (item.member.photoUrl == null || item.member.photoUrl!.isEmpty)
+                    ? const Icon(Icons.person, color: AppColors.inkPrimary)
+                    : null,
+              ),
+              const SizedBox(width: AppSpacing.gutter),
+              // Middle: name + phone
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.member.name, style: AppText.bodyLg),
+                    const SizedBox(height: AppSpacing.unit),
+                    Text(
+                      item.member.phoneNo,
+                      style: AppText.bodySm.copyWith(
+                        color: AppColors.inkSecondary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-
-            // Right: days remaining (monospace)
-            if (days != null)
-              Text(
-                days.toString(),
-                style: AppText.dataLg.copyWith(color: daysColor),
-              ),
-          ],
+              // Right: days remaining (monospace)
+              if (days != null)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      days.toString(),
+                      style: AppText.display.copyWith(
+                        color: daysColor,
+                        fontSize: 24,
+                      ),
+                    ),
+                    Text(
+                      'DAYS',
+                      style: AppText.label.copyWith(
+                        color: AppColors.inkSecondary,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -345,7 +365,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
   // --------------------------------------------------------------------------
   Widget _buildFab(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 80),
+      margin: const EdgeInsets.only(bottom: 110),
       child: ElevatedButton(
         onPressed: () => context.push(AppRoutes.addMember),
         style: ElevatedButton.styleFrom(
