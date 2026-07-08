@@ -8,6 +8,7 @@ import '../../../core/config/theme.dart';
 import '../../../core/router/app_router.dart';
 import '../data/members_repository.dart';
 import 'member_list_controller.dart';
+import 'widgets/member_card.dart';
 
 /// ──────────────────────────────────────────────
 /// Member List & Search — Screen 3 from GOAL.md.
@@ -53,6 +54,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
+        bottom: false,
         child: Column(
           children: [
             _buildTopBar(context),
@@ -60,7 +62,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
             _buildFilterTabs(currentFilter),
             Expanded(
               child: membersState.when(
-                data: (members) => _buildMemberList(context, ref, members),
+                data: (members) => _buildMemberList(context, ref, members, currentFilter),
                 loading: () => const Center(
                   child: CircularProgressIndicator(
                     color: AppColors.inkPrimary,
@@ -92,20 +94,10 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
       ),
       child: Row(
         children: [
-          const Icon(Icons.menu, color: AppColors.inkPrimary, size: 24),
-          const SizedBox(width: AppSpacing.gutter),
           Expanded(
             child: Text(
               'FitTrack Owner',
               style: AppText.headline.copyWith(fontWeight: FontWeight.w900),
-            ),
-          ),
-          IconButton(
-            onPressed: () => context.push(AppRoutes.settings),
-            icon: const Icon(
-              Icons.account_circle_outlined,
-              color: AppColors.inkPrimary,
-              size: 24,
             ),
           ),
         ],
@@ -223,6 +215,7 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
     BuildContext context,
     WidgetRef ref,
     List<MemberWithMembership> members,
+    MemberStatusFilter currentFilter,
   ) {
     if (members.isEmpty) {
       return Center(
@@ -247,86 +240,16 @@ class _MemberListScreenState extends ConsumerState<MemberListScreen> {
         ).copyWith(bottom: 180),
         itemCount: members.length,
         itemBuilder: (context, index) {
-          return _buildMemberRow(context, members[index]);
+          return _buildMemberRow(context, members[index], currentFilter);
         },
       ),
     );
   }
 
-  Widget _buildMemberRow(BuildContext context, MemberWithMembership item) {
-    final days = item.daysRemaining;
-    // Color: expired/≤7 days → signal red, otherwise inkPrimary
-    final daysColor = (days != null && days <= 7)
-        ? AppColors.signal
-        : AppColors.inkPrimary;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.stackMd),
-      elevation: 0,
-      color: AppColors.surface,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(cornerRadius),
-        side: const BorderSide(color: AppColors.border),
-      ),
-      child: InkWell(
-        onTap: () => context.push('/members/${item.member.id}'),
-        borderRadius: BorderRadius.circular(cornerRadius),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.gutter),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.inkPrimary.withValues(alpha: 0.1),
-                backgroundImage: (item.member.photoUrl != null && item.member.photoUrl!.isNotEmpty)
-                    ? NetworkImage(item.member.photoUrl!)
-                    : null,
-                child: (item.member.photoUrl == null || item.member.photoUrl!.isEmpty)
-                    ? const Icon(Icons.person, color: AppColors.inkPrimary)
-                    : null,
-              ),
-              const SizedBox(width: AppSpacing.gutter),
-              // Middle: name + phone
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(item.member.name, style: AppText.bodyLg),
-                    const SizedBox(height: AppSpacing.unit),
-                    Text(
-                      item.member.phoneNo,
-                      style: AppText.bodySm.copyWith(
-                        color: AppColors.inkSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              // Right: days remaining (monospace)
-              if (days != null)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      days.toString(),
-                      style: AppText.display.copyWith(
-                        color: daysColor,
-                        fontSize: 24,
-                      ),
-                    ),
-                    Text(
-                      'DAYS',
-                      style: AppText.label.copyWith(
-                        color: AppColors.inkSecondary,
-                        fontSize: 10,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
-        ),
-      ),
+  Widget _buildMemberRow(BuildContext context, MemberWithMembership item, MemberStatusFilter currentFilter) {
+    return MemberCard(
+      item: item,
+      isExpiredTab: currentFilter == MemberStatusFilter.expired,
     );
   }
 

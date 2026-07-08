@@ -112,7 +112,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       children: [
         Text(
           'FITTRACK',
-          style: AppText.display.copyWith(
+          style: Theme.of(context).textTheme.headlineLarge?.copyWith(
             fontWeight: FontWeight.w900,
             letterSpacing: 24 * 0.2, // 0.2 em wide tracking
           ),
@@ -120,7 +120,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         const SizedBox(height: AppSpacing.unit),
         Text(
           'Owner',
-          style: AppText.label.copyWith(color: AppColors.inkSecondary),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: AppColors.inkSecondary,
+          ),
         ),
       ],
     );
@@ -172,7 +174,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: AppText.label.copyWith(color: AppColors.inkSecondary),
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+        color: AppColors.inkSecondary,
+      ),
     );
   }
 
@@ -183,10 +187,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         controller: _emailController,
         keyboardType: TextInputType.emailAddress,
         autocorrect: false,
-        style: AppText.bodyLg,
+        style: Theme.of(context).textTheme.titleMedium,
         decoration: InputDecoration(
           hintText: 'owner@gym.co',
-          hintStyle: AppText.bodyLg.copyWith(color: AppColors.inkSecondary),
+          hintStyle: Theme.of(context).textTheme.titleMedium?.copyWith(
+            color: AppColors.inkSecondary,
+          ),
           filled: true,
           fillColor: AppColors.surface,
           contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -249,7 +255,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
           obscureText: true,
-          style: AppText.dataLg,
+          style: Theme.of(context).textTheme.headlineSmall,
           maxLength: 1,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
@@ -314,7 +320,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               )
             : Text(
                 'LOG IN',
-                style: AppText.label.copyWith(
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: AppColors.surface,
                   letterSpacing: 12 * 0.15, // widest tracking for button
                 ),
@@ -330,7 +336,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       },
       child: Text(
         'Forgot PIN?',
-        style: AppText.label.copyWith(color: AppColors.inkSecondary),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+          color: AppColors.inkSecondary,
+        ),
       ),
     );
   }

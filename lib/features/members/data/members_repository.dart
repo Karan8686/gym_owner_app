@@ -1,9 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gym_owner_app/core/config/supabase_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 import '../domain/member.dart';
 import '../domain/membership.dart';
 import '../domain/membership_math.dart';
+import '../domain/user_credentials_generator.dart';
 
 // ---------------------------------------------------------------------------
 // Members Repository — all member + membership Supabase queries.
@@ -112,7 +115,8 @@ class MembersRepository {
   }
 
   /// Create a new member, their initial membership, and a confirmed payment record.
-  Future<void> createMember({
+  /// Auto-generates a user login in Supabase Auth and returns the credentials.
+  Future<({String email, String password})> createMember({
     required String name,
     required String phoneNo,
     required String planType,
@@ -123,17 +127,36 @@ class MembersRepository {
     DateTime? customDueDate,
     DateTime? customPaymentDate,
   }) async {
-    final srNo = await _getNextSrNo();
+    final generatedEmail = UserCredentialsGenerator.generateEmail(name);
+    final generatedPassword = UserCredentialsGenerator.generatePassword(phoneNo);
 
-    // 1. Insert Member
-    final memberResponse = await supabase.from('members').insert({
+    // 1. Sign up the user in Supabase Auth using a temporary client
+    // so we don't disrupt the owner's active session.
+    final tempClient = SupabaseClient(
+      supabaseUrl,
+      supabaseAnonKey,
+      authOptions: const AuthClientOptions(
+        authFlowType: AuthFlowType.implicit,
+      ),
+    );
+    final authResponse = await tempClient.auth.signUp(
+      email: generatedEmail,
+      password: generatedPassword,
+    );
+    final authUserId = authResponse.user?.id;
+
+    final srNo = await _getNextSrNo();
+    final memberId = const Uuid().v4();
+
+    // 2. Insert Member
+    await supabase.from('members').insert({
+      'id': memberId,
       'sr_no': srNo,
       'name': name,
       'phone_no': phoneNo,
       if (photoUrl != null && photoUrl.trim().isNotEmpty) 'photo_url': photoUrl.trim(),
-    }).select().single();
-
-    final memberId = memberResponse['id'] as String;
+      'auth_user_id': authUserId,
+    });
 
     // Calculate due date
     final dueDate = customDueDate ?? MembershipMath.calculateNewDueDate(
@@ -144,8 +167,10 @@ class MembersRepository {
     
     final paymentDate = customPaymentDate ?? startDate;
 
-    // 2. Insert Membership
-    final membershipResponse = await supabase.from('memberships').insert({
+    // 3. Insert Membership
+    final membershipId = const Uuid().v4();
+    await supabase.from('memberships').insert({
+      'id': membershipId,
       'member_id': memberId,
       'plan_type': planType,
       'duration_months': durationMonths,
@@ -154,32 +179,78 @@ class MembersRepository {
       'due_date': dueDate.toIso8601String(),
       'payment_date': paymentDate.toIso8601String(),
       'status': 'active',
-    }).select().single();
+    });
 
-    final membershipId = membershipResponse['id'] as String;
-
-    // 3. Insert Confirmed Payment
+    // 4. Insert Confirmed Payment
     await supabase.from('payments').insert({
+      'id': const Uuid().v4(),
       'member_id': memberId,
       'membership_id': membershipId,
       'amount': priceCharged,
+      'utr_number': '', // Default for now
       'status': 'confirmed',
       'paid_at': paymentDate.toIso8601String(),
       'confirmed_at': DateTime.now().toIso8601String(),
       'confirmed_by': supabase.auth.currentUser?.id,
     });
+
+    return (email: generatedEmail, password: generatedPassword);
   }
 
-  /// Update member details.
+  /// Update member details and their latest membership.
   Future<void> updateMember({
     required String id,
     required String name,
     required String phoneNo,
+    String? photoUrl,
+    String? membershipId,
+    String? planType,
+    int? durationMonths,
+    double? priceCharged,
+    DateTime? startDate,
+    DateTime? dueDate,
+    DateTime? paymentDate,
   }) async {
+    // 1. Update Member
+    final photoUrlValue = (photoUrl != null && photoUrl.trim().isNotEmpty) ? photoUrl.trim() : null;
     await supabase.from('members').update({
       'name': name,
-      'phone_no': phoneNo,
+      // We don't update phone_no per user request, but we keep it in the method signature to avoid breaking other calls
+      'photo_url': photoUrlValue,
     }).eq('id', id);
+
+    // 2. Update Membership
+    if (membershipId != null) {
+      final membershipUpdates = <String, dynamic>{};
+      if (planType != null) membershipUpdates['plan_type'] = planType;
+      if (durationMonths != null) membershipUpdates['duration_months'] = durationMonths;
+      if (priceCharged != null) membershipUpdates['price_charged'] = priceCharged;
+      if (startDate != null) membershipUpdates['start_date'] = startDate.toIso8601String();
+      if (dueDate != null) membershipUpdates['due_date'] = dueDate.toIso8601String();
+      if (paymentDate != null) membershipUpdates['payment_date'] = paymentDate.toIso8601String();
+
+      if (membershipUpdates.isNotEmpty) {
+        await supabase.from('memberships').update(membershipUpdates).eq('id', membershipId);
+      }
+
+      // 3. Update associated payment
+      if (priceCharged != null || paymentDate != null) {
+        final paymentsResponse = await supabase
+            .from('payments')
+            .select('id')
+            .eq('membership_id', membershipId)
+            .limit(1)
+            .maybeSingle();
+
+        if (paymentsResponse != null) {
+          final paymentId = paymentsResponse['id'] as String;
+          final paymentUpdates = <String, dynamic>{};
+          if (priceCharged != null) paymentUpdates['amount'] = priceCharged;
+          if (paymentDate != null) paymentUpdates['paid_at'] = paymentDate.toIso8601String();
+          await supabase.from('payments').update(paymentUpdates).eq('id', paymentId);
+        }
+      }
+    }
   }
 
   /// Remove a member and all their associated records.
@@ -212,23 +283,26 @@ class MembersRepository {
     final startDate = baseDueDate.isAfter(now) ? baseDueDate : now;
 
     // Insert new membership
-    final membershipResponse = await supabase.from('memberships').insert({
+    final membershipId = const Uuid().v4();
+    await supabase.from('memberships').insert({
+      'id': membershipId,
       'member_id': memberId,
       'plan_type': planType,
       'duration_months': durationMonths,
       'price_charged': priceCharged,
       'start_date': startDate.toIso8601String(),
       'due_date': newDueDate.toIso8601String(),
+      'payment_date': now.toIso8601String(),
       'status': 'active',
-    }).select().single();
-
-    final membershipId = membershipResponse['id'] as String;
+    });
 
     // Insert confirmed payment
     await supabase.from('payments').insert({
+      'id': const Uuid().v4(),
       'member_id': memberId,
       'membership_id': membershipId,
       'amount': priceCharged,
+      'utr_number': '', // Default for now
       'status': 'confirmed',
       'paid_at': now.toIso8601String(),
       'confirmed_at': now.toIso8601String(),

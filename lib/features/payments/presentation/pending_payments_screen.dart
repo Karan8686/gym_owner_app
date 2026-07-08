@@ -31,7 +31,7 @@ class PendingPaymentsScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.inkPrimary),
-          onPressed: () => context.go(AppRoutes.dashboard),
+          onPressed: () => context.go(AppRoutes.memberList),
         ),
         title: Text(
           'Pending Payments',
@@ -121,101 +121,126 @@ class PendingPaymentsScreen extends ConsumerWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Left details
+            // Left: Avatar (matching MemberCard style)
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.inkPrimary.withValues(alpha: 0.1),
+              ),
+              child: Center(
+                child: Text(
+                  item.memberName.isNotEmpty ? item.memberName[0].toUpperCase() : '?',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppColors.inkPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            
+            // Middle: Details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     item.memberName,
-                    style: AppText.bodyLg.copyWith(fontWeight: FontWeight.w600),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.inkPrimary,
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.unit),
+                  const SizedBox(height: 2),
                   Text(
-                    '₹${payment.amount.toStringAsFixed(2)}',
-                    style: AppText.dataLg.copyWith(fontWeight: FontWeight.w700),
+                    '₹${payment.amount.toStringAsFixed(0)}',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.inkPrimary,
+                    ),
                   ),
                   if (payment.utrNumber != null) ...[
-                    const SizedBox(height: AppSpacing.unit),
+                    const SizedBox(height: 2),
                     Text(
                       'UPI: ${payment.utrNumber}',
-                      style: AppText.dataSm.copyWith(color: AppColors.inkSecondary),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.inkSecondary,
+                      ),
                     ),
                   ],
-                  const SizedBox(height: AppSpacing.unit),
+                  const SizedBox(height: 4),
                   Text(
                     timeStr,
-                    style: AppText.label.copyWith(color: AppColors.inkSecondary, fontSize: 10),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.inkSecondary,
+                      fontSize: 10,
+                    ),
                   ),
                 ],
               ),
             ),
 
-            // Right action buttons
-            const SizedBox(width: AppSpacing.gutter),
-            SizedBox(
-              width: 96,
-              child: Column(
-                children: [
-                  // Confirm Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 32,
-                    child: ElevatedButton(
-                      onPressed: () => ref
-                          .read(pendingPaymentsControllerProvider.notifier)
-                          .confirmPayment(
-                            paymentId: payment.id,
-                            membershipId: payment.membershipId,
-                          ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.inkPrimary,
-                        foregroundColor: AppColors.surface,
-                        padding: EdgeInsets.zero,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
+            // Right: Action buttons
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  height: 32,
+                  child: ElevatedButton.icon(
+                    onPressed: () => ref
+                        .read(pendingPaymentsControllerProvider.notifier)
+                        .confirmPayment(
+                          paymentId: payment.id,
+                          membershipId: payment.membershipId,
                         ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.inkPrimary,
+                      foregroundColor: AppColors.surface,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        'CONFIRM',
-                        style: AppText.label.copyWith(
-                          color: AppColors.surface,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    icon: const Icon(Icons.check, size: 14),
+                    label: Text(
+                      'CONFIRM',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.surface,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.unit * 2),
-                  // Reject Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 32,
-                    child: OutlinedButton(
-                      onPressed: () => ref
-                          .read(pendingPaymentsControllerProvider.notifier)
-                          .rejectPayment(paymentId: payment.id),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.signal,
-                        side: const BorderSide(color: AppColors.signal),
-                        padding: EdgeInsets.zero,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 32,
+                  child: OutlinedButton.icon(
+                    onPressed: () => ref
+                        .read(pendingPaymentsControllerProvider.notifier)
+                        .rejectPayment(paymentId: payment.id),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.signal,
+                      side: const BorderSide(color: AppColors.signal),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
-                        'REJECT',
-                        style: AppText.label.copyWith(
-                          color: AppColors.signal,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    ),
+                    icon: const Icon(Icons.close, size: 14),
+                    label: Text(
+                      'REJECT',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.signal,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         ),

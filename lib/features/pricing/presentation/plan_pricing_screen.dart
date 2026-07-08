@@ -98,7 +98,7 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
         ),
         title: Text(
           'Pricing',
-          style: AppText.headline.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
         backgroundColor: AppColors.surface,
@@ -140,7 +140,7 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
                           const SizedBox(height: AppSpacing.stackLg),
                           Text(
                             _errorMessage!,
-                            style: AppText.bodySm.copyWith(color: AppColors.signal),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.signal),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -167,12 +167,12 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
             children: [
               Text(
                 'Failed to load pricing configurations.',
-                style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
               ),
               const SizedBox(height: AppSpacing.stackMd),
               TextButton(
                 onPressed: () => ref.read(planPricingControllerProvider.notifier).refresh(),
-                child: Text('Retry', style: AppText.label.copyWith(color: AppColors.inkPrimary)),
+                child: Text('Retry', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.inkPrimary)),
               ),
             ],
           ),
@@ -184,7 +184,7 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title.toUpperCase(),
-      style: AppText.label.copyWith(
+      style: Theme.of(context).textTheme.labelMedium?.copyWith(
         color: AppColors.inkSecondary,
         letterSpacing: 2,
       ),
@@ -230,7 +230,7 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: AppText.bodyLg),
+          Text(label, style: Theme.of(context).textTheme.titleMedium),
           SizedBox(
             width: 100,
             child: Row(
@@ -238,14 +238,14 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
               children: [
                 Text(
                   '₹',
-                  style: AppText.dataLg.copyWith(color: AppColors.inkPrimary, fontWeight: FontWeight.bold),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: AppColors.inkPrimary, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(width: 4),
                 Expanded(
                   child: TextFormField(
                     controller: _controllers[item.id],
                     keyboardType: TextInputType.number,
-                    style: AppText.dataLg.copyWith(
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                       color: AppColors.inkPrimary,
                     ),
@@ -306,7 +306,7 @@ class _PlanPricingScreenState extends ConsumerState<PlanPricingScreen> {
                   )
                 : Text(
                     'SAVE PRICES',
-                    style: AppText.bodyLg.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: AppColors.surface,
                       fontWeight: FontWeight.w600,
                     ),

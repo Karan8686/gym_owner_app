@@ -25,27 +25,33 @@ class SettingsScreen extends ConsumerWidget {
             // ---- Header Section ---------------------------------------------
             Container(
               width: double.infinity,
+              margin: const EdgeInsets.only(
+                top: AppSpacing.stackLg,
+                left: AppSpacing.gutter,
+                right: AppSpacing.gutter,
+              ),
               padding: const EdgeInsets.all(AppSpacing.containerPadding),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: AppColors.surface,
-                border: Border(bottom: BorderSide(color: AppColors.border)),
+                border: Border.all(color: AppColors.border),
+                borderRadius: BorderRadius.circular(cornerRadius),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Apex Athletics',
-                    style: AppText.display.copyWith(fontWeight: FontWeight.w900),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: AppSpacing.unit),
                   Text(
                     'Owner: $ownerName',
-                    style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     ownerEmail,
-                    style: AppText.dataSm.copyWith(color: AppColors.inkSecondary),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(color: AppColors.inkSecondary),
                   ),
                 ],
               ),
@@ -72,50 +78,30 @@ class SettingsScreen extends ConsumerWidget {
                       context,
                       title: 'Revenue & Analytics',
                       onTap: () => context.push(AppRoutes.analytics),
+                      isLast: true,
                     ),
                   ]),
 
-                  const SizedBox(height: AppSpacing.stackMd),
-                  _buildMenuSection([
-                    _buildMenuItem(
-                      context,
-                      title: 'Gym Details',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      context,
-                      title: 'Notification Preferences',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      context,
-                      title: 'Manage Staff Access',
-                      onTap: () {},
-                    ),
-                    _buildMenuItem(
-                      context,
-                      title: 'Export Member Data',
-                      onTap: () {},
-                    ),
-                  ]),
+
 
                   const SizedBox(height: AppSpacing.stackLg),
                   
                   // ---- Log Out Button ---------------------------------------
                   Container(
-                    decoration: const BoxDecoration(
+                    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+                    decoration: BoxDecoration(
                       color: AppColors.surface,
-                      border: Border.symmetric(
-                        horizontal: BorderSide(color: AppColors.border),
-                      ),
+                      border: Border.all(color: AppColors.border),
+                      borderRadius: BorderRadius.circular(cornerRadius),
                     ),
+                    clipBehavior: Clip.antiAlias,
                     child: ListTile(
                       onTap: () {
                         ref.read(authControllerProvider.notifier).signOut();
                       },
                       title: Text(
                         'Log Out',
-                        style: AppText.bodyLg.copyWith(
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: AppColors.signal,
                           fontWeight: FontWeight.w600,
                         ),
@@ -133,12 +119,13 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildMenuSection(List<Widget> items) {
     return Container(
-      decoration: const BoxDecoration(
+      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+      decoration: BoxDecoration(
         color: AppColors.surface,
-        border: Border.symmetric(
-          horizontal: BorderSide(color: AppColors.border),
-        ),
+        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(cornerRadius),
       ),
+      clipBehavior: Clip.antiAlias,
       child: Column(
         children: items,
       ),
@@ -149,14 +136,15 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context, {
     required String title,
     required VoidCallback onTap,
+    bool isLast = false,
   }) {
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        border: isLast ? null : const Border(bottom: BorderSide(color: AppColors.border)),
       ),
       child: ListTile(
         onTap: onTap,
-        title: Text(title, style: AppText.bodyLg),
+        title: Text(title, style: Theme.of(context).textTheme.titleMedium),
         trailing: const Icon(
           Icons.chevron_right,
           color: AppColors.inkSecondary,

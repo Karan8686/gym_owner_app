@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 
 import '../../../core/config/theme.dart';
 import '../domain/membership.dart';
+import '../data/members_repository.dart';
 import 'member_detail_controller.dart';
+import 'member_list_controller.dart';
 
 /// ──────────────────────────────────────────────
 /// Member Detail — Screen 4 from GOAL.md.
@@ -23,6 +25,72 @@ class MemberDetailScreen extends ConsumerWidget {
 
   final String memberId;
 
+  Future<void> _removeMember(BuildContext context, WidgetRef ref) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(cornerRadius),
+            side: const BorderSide(color: AppColors.border),
+          ),
+          backgroundColor: AppColors.surface,
+          title: Text('Remove Member', style: AppText.headline),
+          content: Text(
+            'Are you sure you want to remove this member? This action is permanent and deletes all membership and payment logs.',
+            style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: AppText.label.copyWith(color: AppColors.inkSecondary),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                'Remove',
+                style: AppText.label.copyWith(color: AppColors.signal),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm != true || !context.mounted) return;
+
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(color: AppColors.inkPrimary),
+        ),
+      );
+
+      await ref.read(membersRepositoryProvider).deleteMember(memberId);
+      ref.invalidate(allMembersProvider);
+
+      if (context.mounted) {
+        Navigator.of(context).pop(); // pop loading
+        context.go('/members');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop(); // pop loading
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Failed to remove member. Check your connection."),
+            backgroundColor: AppColors.signal,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detailState = ref.watch(memberDetailControllerProvider(memberId));
@@ -36,6 +104,12 @@ class MemberDetailScreen extends ConsumerWidget {
         foregroundColor: AppColors.inkPrimary,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          IconButton(
+            onPressed: () => _removeMember(context, ref),
+            icon: const Icon(Icons.delete_outline, color: AppColors.signal),
+          ),
+        ],
       ),
       body: detailState.when(
         data: (data) => _buildContent(context, data),
@@ -45,13 +119,17 @@ class MemberDetailScreen extends ConsumerWidget {
             strokeWidth: 2,
           ),
         ),
-        error: (error, _) => Center(
+        error: (error, stack) => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                "Couldn't load member details.",
-                style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  error.toString(),
+                  style: AppText.bodySm.copyWith(color: AppColors.signal),
+                  textAlign: TextAlign.center,
+                ),
               ),
               const SizedBox(height: AppSpacing.stackMd),
               TextButton(
@@ -80,7 +158,7 @@ class MemberDetailScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(AppSpacing.gutter),
       children: [
         // ---- Header card ----------------------------------------------------
-        _buildHeaderCard(data, membership),
+        _buildHeaderCard(context, data, membership),
         const SizedBox(height: AppSpacing.stackMd),
 
         // ---- Membership section ---------------------------------------------
@@ -102,6 +180,11 @@ class MemberDetailScreen extends ConsumerWidget {
               _buildDetailRow(
                 'Due Date',
                 _formatDate(membership.dueDate),
+                isData: true,
+              ),
+              _buildDetailRow(
+                'Fees Paid',
+                '₹${membership.priceCharged.toStringAsFixed(2)}',
                 isData: true,
                 isLast: true,
               ),
@@ -175,7 +258,7 @@ class MemberDetailScreen extends ConsumerWidget {
   // --------------------------------------------------------------------------
   // Header card: name, phone, days left
   // --------------------------------------------------------------------------
-  Widget _buildHeaderCard(MemberDetailData data, Membership? membership) {
+  Widget _buildHeaderCard(BuildContext context, MemberDetailData data, Membership? membership) {
     final daysLeft = membership?.daysRemaining;
     final daysColor = (daysLeft != null && daysLeft <= 7)
         ? AppColors.signal
@@ -191,26 +274,42 @@ class MemberDetailScreen extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: AppColors.inkPrimary.withValues(alpha: 0.1),
-            backgroundImage: (data.member.photoUrl != null && data.member.photoUrl!.isNotEmpty)
-                ? NetworkImage(data.member.photoUrl!)
-                : null,
-            child: (data.member.photoUrl == null || data.member.photoUrl!.isEmpty)
-                ? const Icon(Icons.person, color: AppColors.inkPrimary, size: 32)
-                : null,
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.inkPrimary.withValues(alpha: 0.1),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: (data.member.photoUrl != null && data.member.photoUrl!.isNotEmpty)
+                ? Image.network(data.member.photoUrl!, fit: BoxFit.cover)
+                : Center(
+                    child: Text(
+                      data.member.name.isNotEmpty ? data.member.name[0].toUpperCase() : '?',
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: AppColors.inkPrimary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
           ),
           const SizedBox(width: AppSpacing.gutter),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(data.member.name, style: AppText.display),
-                const SizedBox(height: AppSpacing.unit),
+                Text(
+                  data.member.name,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.inkPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
                 Text(
                   data.member.phoneNo,
-                  style: AppText.bodySm.copyWith(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppColors.inkSecondary,
                   ),
                 ),
@@ -223,13 +322,17 @@ class MemberDetailScreen extends ConsumerWidget {
               children: [
                 Text(
                   daysLeft.toString(),
-                  style: AppText.dataLg.copyWith(color: daysColor),
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: daysColor,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.unit),
+                const SizedBox(height: 2),
                 Text(
                   'DAYS LEFT',
-                  style: AppText.label.copyWith(
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     color: AppColors.inkSecondary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
@@ -401,12 +504,12 @@ class MemberDetailScreen extends ConsumerWidget {
                 child: Container(
                   height: 56,
                   alignment: Alignment.center,
-                  color: AppColors.background,
+                  color: AppColors.inkPrimary,
                   child: Text(
                     'Renew Membership',
                     style: AppText.bodySm.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.inkSecondary,
+                      color: AppColors.surface,
                     ),
                   ),
                 ),

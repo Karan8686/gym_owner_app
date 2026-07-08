@@ -21,7 +21,9 @@ class RenewMembershipScreen extends ConsumerStatefulWidget {
 }
 
 class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
+  String _planType = 'weight'; // default
   int _durationMonths = 1; // default
+  bool _hasInitializedPlan = false;
   double _price = 0.0;
   DateTime? _computedNewDueDate;
 
@@ -50,12 +52,16 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
       body: detailState.when(
         data: (data) {
           final membership = data.latestMembership;
-          final planType = membership?.planType ?? 'weight';
+          if (!_hasInitializedPlan) {
+            _planType = membership?.planType ?? 'weight';
+            _hasInitializedPlan = true;
+          }
 
           // Asynchronously resolve price and new due date
           _resolveRenewalDetails(membership?.dueDate);
 
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: SingleChildScrollView(
@@ -73,13 +79,28 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
 
                       const SizedBox(height: AppSpacing.stackLg),
 
+                      // ---- Plan Selection ------------------------------------
+                      Text(
+                        'PLAN',
+                        style: AppText.label.copyWith(color: AppColors.inkSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.stackSm),
+                      Row(
+                        children: [
+                          _buildPlanButton('weight', 'Weight Only'),
+                          const SizedBox(width: AppSpacing.gutter),
+                          _buildPlanButton('cardio_weight', 'Cardio + Weight'),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.stackLg),
+
                       // ---- Duration Selection -------------------------------
                       Text(
                         'RENEW FOR',
                         style: AppText.label.copyWith(color: AppColors.inkSecondary),
                       ),
                       const SizedBox(height: AppSpacing.stackSm),
-                      _buildDurationGrid(planType),
+                      _buildDurationGrid(_planType),
 
                       const SizedBox(height: AppSpacing.stackLg),
 
@@ -158,7 +179,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
               ),
 
               // ---- Bottom Confirmation Button ------------------------------
-              _buildConfirmButton(planType),
+              _buildConfirmButton(_planType),
             ],
           );
         },
@@ -180,7 +201,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
 
   void _resolveRenewalDetails(DateTime? currentDueDate) async {
     final computedPrice = await ref.read(pricingRepositoryProvider).getPriceFor(
-          planType: 'weight', // fallback/default lookup
+          planType: _planType,
           durationMonths: _durationMonths,
         );
 
@@ -207,6 +228,37 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
       return '$plan • Expired $date';
     }
     return '$plan • Due $date';
+  }
+
+  Widget _buildPlanButton(String type, String label) {
+    final isSelected = _planType == type;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            _planType = type;
+          });
+        },
+        child: Container(
+          height: 48,
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.inkPrimary : AppColors.surface,
+            border: isSelected
+                ? Border.all(color: AppColors.inkPrimary, width: 2)
+                : Border.all(color: AppColors.border, width: 1),
+            borderRadius: BorderRadius.circular(cornerRadius),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: AppText.bodySm.copyWith(
+              color: isSelected ? AppColors.surface : AppColors.inkPrimary,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildDurationGrid(String planType) {
@@ -273,7 +325,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
 
       // Refresh listings
       ref.invalidate(memberDetailControllerProvider(widget.memberId));
-      ref.invalidate(memberListControllerProvider);
+      ref.invalidate(allMembersProvider);
 
       if (mounted) {
         context.pop();
@@ -281,7 +333,7 @@ class _RenewMembershipScreenState extends ConsumerState<RenewMembershipScreen> {
     } catch (e) {
       setState(() {
         _isLoading = false;
-        _error = 'Failed to confirm renewal. Check your connection.';
+        _error = "Failed: ${e.toString()}";
       });
     }
   }

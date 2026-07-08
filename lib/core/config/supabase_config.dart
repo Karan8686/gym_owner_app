@@ -16,10 +16,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 /// Global error message if Supabase initialization fails.
 String? supabaseInitError;
 
-Future<void> initSupabase() async {
-  const supabaseUrl = 'https://ohfmvhazzihvwperpjlk.supabase.co';
-  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oZm12aGF6emlodndwZXJwamxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDkxNjEsImV4cCI6MjA5ODk4NTE2MX0.a62tg8WzQBPsMlO8CRpIUuYgXJ0-vIVnL6RB-OxM8cY';
+const supabaseUrl = 'https://ohfmvhazzihvwperpjlk.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oZm12aGF6emlodndwZXJwamxrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0MDkxNjEsImV4cCI6MjA5ODk4NTE2MX0.a62tg8WzQBPsMlO8CRpIUuYgXJ0-vIVnL6RB-OxM8cY';
 
+Future<void> initSupabase() async {
   try {
     await Supabase.initialize(
       url: supabaseUrl,

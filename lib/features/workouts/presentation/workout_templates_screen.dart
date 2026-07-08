@@ -31,7 +31,7 @@ class WorkoutTemplatesScreen extends ConsumerWidget {
         ),
         title: Text(
           'Workout Templates',
-          style: AppText.headline.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
         backgroundColor: AppColors.surface,
@@ -45,12 +45,10 @@ class WorkoutTemplatesScreen extends ConsumerWidget {
           child: state.when(
             data: (items) {
               if (items.isEmpty) {
-                return const Center(
+                return Center(
                   child: Text(
                     'No templates created yet.\nTap "+ New Template" to add one.',
-                    style: TextStyle(
-                      fontFamily: 'Inter',
-                      fontSize: 14,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.inkSecondary,
                     ),
                     textAlign: TextAlign.center,
@@ -66,19 +64,21 @@ class WorkoutTemplatesScreen extends ConsumerWidget {
                   bottom: 92, // scroll padding for floating navbar
                 ),
                 itemCount: items.length,
-                separatorBuilder: (_, _) => const Divider(
-                  color: AppColors.border,
-                  height: 1,
-                  thickness: 1,
-                ),
+                separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.stackSm),
                 itemBuilder: (context, index) {
                   final row = items[index];
                   final t = row.template;
 
-                  return InkWell(
+                  return GestureDetector(
                     onTap: () => context.push('/settings/workouts/${t.id}'),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.stackMd),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(cornerRadius),
+                      ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -88,12 +88,12 @@ class WorkoutTemplatesScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   t.name,
-                                  style: AppText.bodyLg.copyWith(fontWeight: FontWeight.w600),
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   '${row.assignedCount} members assigned',
-                                  style: AppText.dataSm.copyWith(color: AppColors.inkSecondary),
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
                                 ),
                               ],
                             ),
@@ -122,12 +122,12 @@ class WorkoutTemplatesScreen extends ConsumerWidget {
                 children: [
                   Text(
                     'Failed to load workout templates.',
-                    style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
                   ),
                   const SizedBox(height: AppSpacing.stackMd),
                   TextButton(
                     onPressed: () => ref.read(workoutTemplatesControllerProvider.notifier).refresh(),
-                    child: Text('Retry', style: AppText.label.copyWith(color: AppColors.inkPrimary)),
+                    child: Text('Retry', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.inkPrimary)),
                   ),
                 ],
               ),
@@ -154,7 +154,7 @@ class WorkoutTemplatesScreen extends ConsumerWidget {
           icon: const Icon(Icons.add, size: 16),
           label: Text(
             'NEW TEMPLATE',
-            style: AppText.label.copyWith(color: AppColors.surface),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.surface),
           ),
         ),
       ),

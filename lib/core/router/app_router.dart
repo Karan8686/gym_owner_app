@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../features/auth/presentation/login_screen.dart';
-import '../../features/dashboard/presentation/dashboard_screen.dart';
+// Removed dashboard import
 import '../../features/members/presentation/member_detail_screen.dart';
 import '../../features/members/presentation/member_list_screen.dart';
 import '../../features/members/presentation/add_member_screen.dart';
@@ -26,7 +26,6 @@ import '../config/theme.dart';
 // ---------------------------------------------------------------------------
 abstract final class AppRoutes {
   static const String login                = '/login';
-  static const String dashboard            = '/';
   static const String memberList           = '/members';
   static const String memberDetail         = '/members/:memberId';
   static const String addMember            = '/members/add';
@@ -45,19 +44,39 @@ abstract final class AppRoutes {
 final rootNavigatorKey = GlobalKey<NavigatorState>(debugLabel: 'root');
 
 // ---------------------------------------------------------------------------
+// GoRouter refresh notifier — notifies GoRouter to re-evaluate redirect
+// when auth state changes.
+// ---------------------------------------------------------------------------
+class GoRouterRefreshNotifier extends ChangeNotifier {
+  GoRouterRefreshNotifier(Ref ref) {
+    ref.listen(
+      authControllerProvider,
+      (previous, next) {
+        notifyListeners();
+      },
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Router — requires a WidgetRef to check auth state for redirects.
 // ---------------------------------------------------------------------------
 GoRouter appRouter(Ref ref) {
+  final refreshNotifier = GoRouterRefreshNotifier(ref);
+  ref.onDispose(() => refreshNotifier.dispose());
+
   return GoRouter(
     navigatorKey: rootNavigatorKey,
-    initialLocation: AppRoutes.dashboard,
+    initialLocation: AppRoutes.memberList,
+    refreshListenable: refreshNotifier,
     redirect: (context, state) {
       final authState = ref.read(authControllerProvider);
       final isLoggedIn = authState.valueOrNull != null;
       final isOnLogin = state.matchedLocation == AppRoutes.login;
 
       if (!isLoggedIn && !isOnLogin) return AppRoutes.login;
-      if (isLoggedIn && isOnLogin) return AppRoutes.dashboard;
+      if (isLoggedIn && isOnLogin) return AppRoutes.memberList;
+      if (isLoggedIn && state.matchedLocation == '/') return AppRoutes.memberList;
       return null; // no redirect
     },
     routes: <RouteBase>[
@@ -74,15 +93,7 @@ GoRouter appRouter(Ref ref) {
           return ScaffoldWithBottomNavBar(navigationShell: navigationShell);
         },
         branches: [
-          // Branch 0: Dashboard
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.dashboard,
-                builder: (context, state) => const DashboardScreen(),
-              ),
-            ],
-          ),
+          // Branch 0 removed
 
           // Branch 1: Members
           StatefulShellBranch(
@@ -240,7 +251,9 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.only(left: 24, right: 24, bottom: 12),
           child: Container(
+            height: 56, // compact height since we don't have icons
             decoration: BoxDecoration(
+              color: AppColors.surface.withValues(alpha: 0.95),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(color: AppColors.border, width: 1),
               boxShadow: [
@@ -251,55 +264,42 @@ class ScaffoldWithBottomNavBar extends StatelessWidget {
                 ),
               ],
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(31),
-              child: NavigationBarTheme(
-                data: NavigationBarThemeData(
-                  labelTextStyle: WidgetStateProperty.resolveWith((states) {
-                    final isSelected = states.contains(WidgetState.selected);
-                    return AppText.label.copyWith(
-                      fontSize: 10,
-                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                      color: isSelected ? AppColors.inkPrimary : AppColors.inkSecondary,
-                    );
-                  }),
-                ),
-                child: NavigationBar(
-                  height: 68,
-                  backgroundColor: AppColors.surface.withValues(alpha: 0.95),
-                  elevation: 0, // Drop shadow is handled by the container
-                  indicatorColor: AppColors.inkPrimary.withValues(alpha: 0.08),
-                  selectedIndex: navigationShell.currentIndex,
-                  onDestinationSelected: (index) {
-                    navigationShell.goBranch(
-                      index,
-                      initialLocation: index == navigationShell.currentIndex,
-                    );
-                  },
-                  destinations: const [
-                    NavigationDestination(
-                      icon: Icon(Icons.grid_view_rounded, color: AppColors.inkSecondary),
-                      selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.inkPrimary),
-                      label: 'DASHBOARD',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.people_alt_rounded, color: AppColors.inkSecondary),
-                      selectedIcon: Icon(Icons.people_alt_rounded, color: AppColors.inkPrimary),
-                      label: 'MEMBERS',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.payment_rounded, color: AppColors.inkSecondary),
-                      selectedIcon: Icon(Icons.payment_rounded, color: AppColors.inkPrimary),
-                      label: 'PAYMENTS',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.more_horiz_rounded, color: AppColors.inkSecondary),
-                      selectedIcon: Icon(Icons.more_horiz_rounded, color: AppColors.inkPrimary),
-                      label: 'MORE',
-                    ),
-                  ],
-                ),
-              ),
+            child: Row(
+              children: [
+                _buildNavItem(0, 'MEMBERS'),
+                _buildNavItem(1, 'PAYMENTS'),
+                _buildNavItem(2, 'MORE'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, String label) {
+    final isActive = navigationShell.currentIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => navigationShell.goBranch(
+          index,
+          initialLocation: index == navigationShell.currentIndex,
+        ),
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          margin: const EdgeInsets.all(6),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: isActive ? AppColors.inkPrimary.withValues(alpha: 0.08) : Colors.transparent,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Text(
+            label,
+            style: AppText.label.copyWith(
+              fontSize: 12,
+              letterSpacing: 0.5,
+              fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+              color: isActive ? AppColors.inkPrimary : AppColors.inkSecondary,
             ),
           ),
         ),

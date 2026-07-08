@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/config/theme.dart';
 import '../../pricing/data/pricing_repository.dart';
@@ -121,6 +123,116 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
     }
   }
 
+  Future<void> _showCredentialsDialog(String email, String password) async {
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColors.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(cornerRadius),
+            side: const BorderSide(color: AppColors.border),
+          ),
+          title: Text(
+            'MEMBER REGISTERED',
+            style: AppText.label.copyWith(color: AppColors.inkPrimary, fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Auto-created login credentials for the member:',
+                style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+              ),
+              const SizedBox(height: AppSpacing.stackMd),
+
+              Text('USER ID (EMAIL)', style: AppText.label.copyWith(color: AppColors.inkSecondary, fontSize: 10)),
+              const SizedBox(height: AppSpacing.unit),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.unit * 2),
+                color: AppColors.background,
+                child: SelectableText(
+                  email,
+                  style: AppText.dataLg.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.stackMd),
+
+              Text('PASSWORD', style: AppText.label.copyWith(color: AppColors.inkSecondary, fontSize: 10)),
+              const SizedBox(height: AppSpacing.unit),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.unit * 2),
+                color: AppColors.background,
+                child: SelectableText(
+                  password,
+                  style: AppText.dataLg.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: 'User ID: $email\nPassword: $password'));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Credentials copied to clipboard')),
+                );
+              },
+              child: Text(
+                'COPY ALL',
+                style: AppText.label.copyWith(color: AppColors.inkPrimary),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final text = Uri.encodeComponent(
+                  'Welcome to FitTrack!\nHere are your login credentials:\n\nUser ID: $email\nPassword: $password'
+                );
+                final cleanPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+                final url = 'https://wa.me/$cleanPhone?text=$text';
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                } else {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Could not launch WhatsApp')),
+                    );
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.inkPrimary,
+                foregroundColor: AppColors.surface,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(cornerRadius),
+                ),
+              ),
+              child: Text(
+                'SHARE VIA WHATSAPP',
+                style: AppText.label.copyWith(color: AppColors.surface),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'DONE',
+                style: AppText.label.copyWith(color: AppColors.inkSecondary),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _saveMember() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -132,7 +244,7 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
     try {
       final priceToSave = double.tryParse(_priceOverrideController.text.trim()) ?? _price;
 
-      await ref.read(membersRepositoryProvider).createMember(
+      final credentials = await ref.read(membersRepositoryProvider).createMember(
             name: _nameController.text.trim(),
             phoneNo: _phoneController.text.trim(),
             planType: _planType,
@@ -145,15 +257,19 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
           );
 
       // Refresh list
-      ref.invalidate(memberListControllerProvider);
+      ref.invalidate(allMembersProvider);
 
       if (mounted) {
-        context.pop();
+        await _showCredentialsDialog(credentials.email, credentials.password);
+        if (mounted) {
+          context.pop();
+        }
       }
     } catch (e) {
+      debugPrint("Error saving member: $e");
       setState(() {
         _isLoading = false;
-        _error = "Couldn't save member. Check connection and try again.";
+        _error = "Couldn't save member: $e";
       });
     }
   }
@@ -176,6 +292,7 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
         shape: const Border(bottom: BorderSide(color: AppColors.border)),
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
             child: SingleChildScrollView(
@@ -187,11 +304,11 @@ class _AddMemberScreenState extends ConsumerState<AddMemberScreen> {
                   children: [
                     // ---- Name & Phone fields container ----------------------
                     Container(
-                      decoration: const BoxDecoration(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
                         color: AppColors.surface,
-                        border: Border.symmetric(
-                          horizontal: BorderSide(color: AppColors.border),
-                        ),
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(cornerRadius),
                       ),
                       child: Column(
                         children: [

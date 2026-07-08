@@ -53,7 +53,7 @@ final memberDetailControllerProvider = AsyncNotifierProvider.family<
 
 class MemberDetailController
     extends FamilyAsyncNotifier<MemberDetailData, String> {
-  late final MembersRepository _repo;
+  late MembersRepository _repo;
 
   @override
   FutureOr<MemberDetailData> build(String memberId) async {

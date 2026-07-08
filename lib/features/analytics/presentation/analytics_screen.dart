@@ -36,7 +36,7 @@ class AnalyticsScreen extends ConsumerWidget {
         ),
         title: Text(
           'Revenue',
-          style: AppText.headline.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
         centerTitle: true,
         backgroundColor: AppColors.surface,
@@ -57,17 +57,17 @@ class AnalyticsScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ---- Summary Card -----------------------------------------
-                  _buildSummarySection(stats, currencyFormatter),
+                  _buildSummarySection(context, stats, currencyFormatter),
 
                   const SizedBox(height: AppSpacing.stackLg),
 
                   // ---- Chart Card -------------------------------------------
-                  _buildChartSection(stats, maxRevenue),
+                  _buildChartSection(context, stats, maxRevenue),
 
                   const SizedBox(height: AppSpacing.stackLg),
 
                   // ---- Breakdown Segment -------------------------------------
-                  _buildBreakdownSection(stats, currencyFormatter),
+                  _buildBreakdownSection(context, stats, currencyFormatter),
                 ],
               ),
             );
@@ -84,12 +84,12 @@ class AnalyticsScreen extends ConsumerWidget {
               children: [
                 Text(
                   'Failed to load analytics statistics.',
-                  style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
                 ),
                 const SizedBox(height: AppSpacing.stackMd),
                 TextButton(
                   onPressed: () => ref.read(analyticsControllerProvider.notifier).refresh(),
-                  child: Text('Retry', style: AppText.label.copyWith(color: AppColors.inkPrimary)),
+                  child: Text('Retry', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.inkPrimary)),
                 ),
               ],
             ),
@@ -99,7 +99,7 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummarySection(dynamic stats, NumberFormat formatter) {
+  Widget _buildSummarySection(BuildContext context, dynamic stats, NumberFormat formatter) {
     final pct = stats.revenueChangePercentage;
     final isPositive = pct >= 0;
     final color = isPositive ? const Color(0xFF107C41) : AppColors.signal;
@@ -117,7 +117,7 @@ class AnalyticsScreen extends ConsumerWidget {
         children: [
           Text(
             formatter.format(stats.currentMonthRevenue),
-            style: AppText.display.copyWith(
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
               fontFamily: 'JetBrainsMono',
               fontWeight: FontWeight.w700,
               fontSize: 32,
@@ -129,7 +129,7 @@ class AnalyticsScreen extends ConsumerWidget {
             children: [
               Text(
                 'This Month',
-                style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
               ),
               const SizedBox(width: 8),
               Container(
@@ -140,12 +140,12 @@ class AnalyticsScreen extends ConsumerWidget {
               const SizedBox(width: 8),
               Text(
                 '$sign${pct.toStringAsFixed(0)}%',
-                style: AppText.label.copyWith(color: color, fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(color: color, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 4),
               Text(
                 'vs last month',
-                style: AppText.bodySm.copyWith(color: AppColors.inkSecondary),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary),
               ),
             ],
           ),
@@ -154,7 +154,7 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildChartSection(dynamic stats, double maxRevenue) {
+  Widget _buildChartSection(BuildContext context, dynamic stats, double maxRevenue) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: 20),
       decoration: BoxDecoration(
@@ -167,7 +167,7 @@ class AnalyticsScreen extends ConsumerWidget {
         children: [
           Text(
             '6-MONTH REVENUE HISTORY',
-            style: AppText.label.copyWith(color: AppColors.inkSecondary, letterSpacing: 1.5),
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.inkSecondary, letterSpacing: 1.5),
           ),
           const SizedBox(height: 24),
           
@@ -221,7 +221,7 @@ class AnalyticsScreen extends ConsumerWidget {
                         const SizedBox(height: 8),
                         Text(
                           m.monthLabel.toUpperCase(),
-                          style: AppText.label.copyWith(fontSize: 10, color: AppColors.inkSecondary),
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(fontSize: 10, color: AppColors.inkSecondary),
                         ),
                       ],
                     );
@@ -235,13 +235,13 @@ class AnalyticsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBreakdownSection(dynamic stats, NumberFormat formatter) {
+  Widget _buildBreakdownSection(BuildContext context, dynamic stats, NumberFormat formatter) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
           'PLAN BREAKDOWN',
-          style: AppText.label.copyWith(color: AppColors.inkSecondary, letterSpacing: 1.5),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(color: AppColors.inkSecondary, letterSpacing: 1.5),
         ),
         const SizedBox(height: AppSpacing.stackSm),
         Container(
@@ -254,12 +254,14 @@ class AnalyticsScreen extends ConsumerWidget {
           child: Column(
             children: [
               _buildBreakdownRow(
+                context: context,
                 title: 'Weight Only',
                 subtitle: '${stats.weightPlanCount} active members',
                 value: formatter.format(stats.weightPlanRevenue),
                 showBorder: true,
               ),
               _buildBreakdownRow(
+                context: context,
                 title: 'Cardio + Weight',
                 subtitle: '${stats.cardioPlanCount} active members',
                 value: formatter.format(stats.cardioPlanRevenue),
@@ -273,6 +275,7 @@ class AnalyticsScreen extends ConsumerWidget {
   }
 
   Widget _buildBreakdownRow({
+    required BuildContext context,
     required String title,
     required String subtitle,
     required String value,
@@ -291,14 +294,14 @@ class AnalyticsScreen extends ConsumerWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: AppText.bodyLg.copyWith(fontWeight: FontWeight.w600)),
+              Text(title, style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 4),
-              Text(subtitle, style: AppText.bodySm.copyWith(color: AppColors.inkSecondary)),
+              Text(subtitle, style: Theme.of(context).textTheme.bodySmall?.copyWith(color: AppColors.inkSecondary)),
             ],
           ),
           Text(
             value,
-            style: AppText.bodyLg.copyWith(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontFamily: 'JetBrainsMono',
               fontWeight: FontWeight.w700,
             ),
